@@ -1,30 +1,45 @@
-import { Text, View, StyleSheet, Image } from "react-native";
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, StatusBar } from 'react-native';
+import { AuthProvider, useAuth } from '../contexts/AuthContext';
+import { OnboardingScreen } from '../components/OnboardingScreen';
+import { LoginScreen } from '../components/LoginScreen';
+import { VaultScreen } from '../components/VaultScreen';
+import { LoadingScreen } from '../components/LoadingScreen';
 
-const EXPO_PUBLIC_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+const AppContent = () => {
+  const { user, isLoading, isFirstTime } = useAuth();
 
-export default function Index() {
-  console.log(EXPO_PUBLIC_BACKEND_URL, "EXPO_PUBLIC_BACKEND_URL");
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
+  if (isFirstTime) {
+    return <OnboardingScreen />;
+  }
+
+  if (!user) {
+    return <LoginScreen />;
+  }
+
+  return <VaultScreen />;
+};
+
+export default function App() {
   return (
-    <View style={styles.container}>
-      <Image
-        source={require("../assets/images/app-image.png")}
-        style={styles.image}
-      />
-    </View>
+    <>
+      <StatusBar barStyle="light-content" backgroundColor="#0A2540" />
+      <AuthProvider>
+        <View style={styles.container}>
+          <AppContent />
+        </View>
+      </AuthProvider>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0c0c0c",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  image: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "contain",
+    backgroundColor: '#0A2540',
   },
 });
