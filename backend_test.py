@@ -15,10 +15,12 @@ import time
 # Configuration
 BACKEND_URL = "https://keymaster-app-4.preview.emergentagent.com/api"
 
-# Test data
-TEST_EMAIL = "john.doe@example.com"
+# Test data - use timestamp to ensure unique emails
+import time
+timestamp = int(time.time())
+TEST_EMAIL = f"testuser{timestamp}@example.com"
 TEST_PASSWORD = "MySecurePassword123!"
-TEST_EMAIL_2 = "jane.smith@example.com"
+TEST_EMAIL_2 = f"testuser2{timestamp}@example.com"
 TEST_PASSWORD_2 = "AnotherSecurePass456!"
 
 class NexaKeyAPITester:
