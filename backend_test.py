@@ -27,10 +27,14 @@ class NexaKeyAPITester:
         self.access_token = None
         self.user_id = None
         self.ph = argon2.PasswordHasher()
+        # Store the hash to reuse for login (simulating client-side storage)
+        self.stored_password_hash = None
         
     def hash_password(self, password: str) -> str:
         """Hash password using Argon2 (simulating client-side hashing)"""
-        return self.ph.hash(password)
+        if self.stored_password_hash is None:
+            self.stored_password_hash = self.ph.hash(password)
+        return self.stored_password_hash
     
     def encrypt_data(self, data: dict) -> str:
         """Simulate client-side encryption by JSON encoding (for testing purposes)"""
