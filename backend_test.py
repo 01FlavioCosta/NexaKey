@@ -262,18 +262,34 @@ class NexaKeyAPITester:
         """Test freemium limit of 20 items"""
         print("\n🔍 Testing Freemium Limits...")
         
-        # Create 20 items (should succeed)
-        created_items = []
-        print("  📝 Creating 20 vault items...")
+        # First, get current item count
+        response = self.make_request("GET", "/vault/items")
+        if response and response.status_code == 200:
+            current_items = response.json()
+            current_count = len(current_items)
+            print(f"  📊 Current vault items: {current_count}")
+        else:
+            current_count = 0
         
-        for i in range(20):
+        # Calculate how many more items we need to reach the limit
+        items_to_create = 20 - current_count
+        
+        if items_to_create <= 0:
+            print("  ⚠️ Already at or above limit, testing 21st item...")
+            items_to_create = 1
+        else:
+            print(f"  📝 Creating {items_to_create} vault items to reach limit...")
+        
+        # Create items up to the limit
+        created_items = []
+        for i in range(items_to_create):
             item_data = {
                 "item_type": "password",
                 "encrypted_data": self.encrypt_data({
-                    "title": f"Test Account {i+1}",
-                    "username": f"user{i+1}@example.com",
-                    "password": f"Password{i+1}!",
-                    "url": f"https://example{i+1}.com"
+                    "title": f"Test Account {current_count + i + 1}",
+                    "username": f"user{current_count + i + 1}@example.com",
+                    "password": f"Password{current_count + i + 1}!",
+                    "url": f"https://example{current_count + i + 1}.com"
                 })
             }
             
@@ -281,20 +297,25 @@ class NexaKeyAPITester:
             if success:
                 created_items.append(item_id)
             else:
-                print(f"  ❌ Failed to create item {i+1}")
-                return False
+                # If we hit the limit before creating all items, that's expected
+                if i == items_to_create - 1 and current_count + i >= 20:
+                    print(f"  ✅ Hit freemium limit at {current_count + i} items")
+                    return True
+                else:
+                    print(f"  ❌ Failed to create item {i+1}")
+                    return False
         
         print(f"  ✅ Successfully created {len(created_items)} items")
         
-        # Try to create the 21st item (should fail)
-        print("  📝 Attempting to create 21st item (should fail)...")
+        # Now try to create one more item (should fail)
+        print("  📝 Attempting to create item beyond limit (should fail)...")
         item_data = {
             "item_type": "password",
             "encrypted_data": self.encrypt_data({
-                "title": "21st Item",
-                "username": "user21@example.com",
-                "password": "Password21!",
-                "url": "https://example21.com"
+                "title": "Beyond Limit Item",
+                "username": "overlimit@example.com",
+                "password": "OverlimitPass!",
+                "url": "https://overlimit.com"
             })
         }
         
