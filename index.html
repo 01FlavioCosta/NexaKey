@@ -1,61 +1,216 @@
-<header class="header">
-    <div class="container">
-        <img src="https://i.imgur.com/g91x2fB.png" alt="NexaKey Logo" class="logo-wordmark">
-        <a href="#pricing" class="btn btn-primary">Comece de Graça</a>
-    </div>
-</header>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexaKey: A chave para sua vida digital</title>
+    <style>
+        :root {
+            --dark-blue: #0A2540;
+            --cyan: #00D4FF;
+            --white: #FFFFFF;
+            --light-gray: #f8f9fa;
+            --text-gray: #6c757d;
+            --heading-font: 'Helvetica Neue', Arial, sans-serif;
+            --body-font: 'Helvetica Neue', Arial, sans-serif;
+        }
+        body {
+            margin: 0;
+            font-family: var(--body-font);
+            background-color: var(--white);
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        section {
+            padding: 80px 0;
+        }
+        h1, h2, h3 {
+            font-family: var(--heading-font);
+            font-weight: 700;
+            color: var(--dark-blue);
+        }
+        h1 { font-size: 3.5rem; margin-bottom: 1rem; }
+        h2 { font-size: 2.5rem; text-align: center; margin-bottom: 4rem; }
+        p { font-size: 1.1rem; }
+        .header {
+            background-color: var(--white);
+            padding: 20px 0;
+            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo-wordmark {
+            height: 40px;
+        }
+        .hero {
+            background-color: var(--dark-blue);
+            color: var(--white);
+            text-align: center;
+            padding: 100px 0;
+        }
+        .hero h1 { color: var(--white); }
+        .hero p { font-size: 1.25rem; max-width: 700px; margin: 0 auto 2rem auto; opacity: 0.9; }
+        .cta-buttons { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        .btn {
+            padding: 15px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .btn-primary { background-color: var(--cyan); color: var(--dark-blue); }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3); }
+        .btn-secondary { background-color: transparent; color: var(--white); border: 2px solid var(--white); }
+        .btn-secondary:hover { background-color: var(--white); color: var(--dark-blue); }
+        .benefits { background-color: var(--light-gray); }
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            text-align: center;
+        }
+        .benefit-card h3 { margin-top: 1.5rem; }
+        .benefit-card p { color: var(--text-gray); }
+        .security {
+            background-color: var(--dark-blue);
+            color: var(--white);
+            text-align: center;
+        }
+        .security h2 { color: var(--cyan); }
+        .security-logo { max-height: 100px; margin-bottom: 2rem; }
+        .security p { max-width: 800px; margin: 0 auto; font-size: 1.2rem; opacity: 0.9; }
+        .pricing-table {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            border-collapse: collapse;
+            text-align: center;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.05);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .pricing-table th, .pricing-table td { padding: 20px; border: 1px solid #e0e0e0; }
+        .pricing-table th { background-color: #f4f4f4; }
+        .pricing-table td:first-child { text-align: left; font-weight: 700; }
+        .pricing-table .highlight { border: 3px solid var(--cyan); }
+        .pricing-table .highlight-header { background-color: var(--dark-blue); color: var(--white); }
+        .pricing-table .price { font-size: 1.5rem; font-weight: 700; color: var(--dark-blue); }
+        .annual-offer { text-align: center; margin-top: 1rem; color: var(--text-gray); }
+        .footer {
+            background-color: var(--dark-blue);
+            color: var(--white);
+            padding: 60px 0;
+            text-align: center;
+        }
+        .footer a { color: var(--cyan); text-decoration: none; margin: 0 10px; }
+        .footer p { margin-top: 20px; opacity: 0.7; }
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            h2 { font-size: 2rem; }
+            section { padding: 60px 0; }
+        }
+    </style>
+</head>
+<body>
 
-<section class="hero">
-    <div class="container">
-        <h1>A chave para sua vida digital, finalmente em um só lugar.</h1>
-        <p>O NexaKey organiza e protege todas as suas senhas com segurança de nível militar. Recupere o controle e nunca mais clique em "Esqueceu sua senha?".</p>
-        <a href="#" class="btn btn-primary">Baixar o App</a>
-    </div>
-</section>
+    <header class="header">
+        <div class="container">
+            <img src="https://i.imgur.com/g91x2fB.png" alt="NexaKey Logo" class="logo-wordmark">
+            <a href="#pricing" class="btn btn-primary">Comece de Graça</a>
+        </div>
+    </header>
 
-<section class="benefits">
-    <div class="container">
-        <h2>Sua vida digital está um caos?</h2>
-        <div class="benefits-grid">
-            <div>
-                <h3>Anotações Inseguras</h3>
-                <p>Chega de usar blocos de notas. Centralize tudo com criptografia de ponta.</p>
-            </div>
-            <div>
-                <h3>Senhas Fracas</h3>
-                <p>O NexaKey gera e memoriza senhas invioláveis para cada uma de suas contas.</p>
-            </div>
-            <div>
-                <h3>Acesso Perdido</h3>
-                <p>Mantenha tudo seguro e acessível, sem perder o acesso a serviços pagos.</p>
+    <section class="hero">
+        <div class="container">
+            <h1>A chave para sua vida digital, finalmente em um só lugar.</h1>
+            <p>O NexaKey organiza e protege todas as suas senhas, notas e dados pessoais com segurança de nível militar. Recupere o controle e nunca mais clique em "Esqueceu sua senha?".</p>
+            <div class="cta-buttons">
+                <a href="#" class="btn btn-primary">Baixar na App Store</a>
+                <a href="#" class="btn btn-secondary">Disponível no Google Play</a>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<section class="security">
-    <div class="container">
-        <img src="https://i.imgur.com/gY9M0ZC.png" alt="NexaKey Cadeado" class="security-logo">
-        <h2>Nossa promessa: Conhecimento Zero.</h2>
-        <p>Seus dados são criptografados no seu dispositivo. Sua Senha Mestra nunca é enviada para nós. A chave é sua, e de mais ninguém.</p>
-    </div>
-</section>
-
-<section id="pricing" class="pricing">
-    <div class="container">
-        <h2>Comece de graça. Evolua quando quiser.</h2>
-        <p><strong>Plano Gratuito:</strong> Salve até 20 senhas em 1 dispositivo. Preço: Grátis.</p>
-        <p><strong>Plano NexaKey Plus:</strong> Itens ilimitados e sincronização em todos os seus dispositivos. Preço: R$ 9,90/mês.</p>
-        <p>Economize com o plano anual! Pague R$ 99,90 e ganhe 2 meses de graça.</p>
-    </div>
-</section>
-
-<footer class="footer">
-    <div class="container">
-        <p>NexaKey © 2025. Todos os direitos reservados.</p>
-        <div>
-            <a href="#">Termos de Serviço</a>
-            <a href="#">Política de Privacidade</a>
+    <section class="benefits">
+        <div class="container">
+            <h2>Sua vida digital está um caos? Você não está sozinho.</h2>
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <h3>Anotações Inseguras</h3>
+                    <p>Chega de usar blocos de notas ou planilhas. Eles são o primeiro lugar que um invasor procura. Centralize tudo com criptografia de ponta.</p>
+                </div>
+                <div class="benefit-card">
+                    <h3>Senhas Fracas e Repetidas</h3>
+                    <p>Usar "senha123" ou a mesma senha em vários lugares é um risco enorme. O NexaKey gera e memoriza senhas invioláveis para cada uma de suas contas.</p>
+                </div>
+                <div class="benefit-card">
+                    <h3>Acesso Perdido</h3>
+                    <p>Perder o acesso a serviços pagos como Netflix ou Spotify por esquecer a senha significa perder dinheiro. Mantenha tudo seguro e acessível.</p>
+                </div>
+            </div>
         </div>
-    </div>
-</footer>
+    </section>
+
+    <section class="security">
+        <div class="container">
+            <img src="https://i.imgur.com/gY9M0ZC.png" alt="NexaKey Cadeado" class="security-logo">
+            <h2>Nossa promessa: Conhecimento Zero.</h2>
+            <p>O NexaKey foi projetado para que apenas você tenha acesso às suas informações. Seus dados são criptografados no seu dispositivo antes de qualquer sincronização. Sua Senha Mestra nunca é enviada para nós. Isso significa que, mesmo que fôssemos obrigados, não teríamos como acessar ou entregar seus dados a ninguém. <strong>A chave é sua, e de mais ninguém.</strong></p>
+        </div>
+    </section>
+
+    <section id="pricing" class="pricing">
+        <div class="container">
+            <h2>Comece de graça. Evolua quando quiser.</h2>
+            <table class="pricing-table">
+                <thead>
+                    <tr>
+                        <th>Funcionalidade</th>
+                        <th>Gratuito</th>
+                        <th class="highlight-header">NexaKey Plus</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Itens no Cofre</td><td>20</td><td class="highlight"><strong>Ilimitado</strong></td></tr>
+                    <tr><td>Dispositivos</td><td>1</td><td class="highlight"><strong>Ilimitado</strong></td></tr>
+                    <tr><td>Sincronização</td><td>❌</td><td class="highlight">✅</td></tr>
+                    <tr><td>Compartilhamento Seguro</td><td>❌</td><td class="highlight">✅</td></tr>
+                    <tr><td>Auditoria de Segurança</td><td>❌</td><td class="highlight">✅</td></tr>
+                    <tr><td>Suporte Prioritário</td><td>❌</td><td class="highlight">✅</td></tr>
+                    <tr>
+                        <td><strong>Preço</strong></td>
+                        <td><strong class="price">Grátis</strong></td>
+                        <td class="highlight"><strong class="price">R$ 9,90/mês</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="annual-offer">Economize com o plano anual! Pague R$ 99,90 e ganhe 2 meses de graça.</p>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <img src="https://i.imgur.com/g91x2fB.png" alt="NexaKey Logo" class="logo-wordmark" style="height: 30px; opacity: 0.8;">
+            <div>
+                <a href="#">Termos de Serviço</a>
+                <a href="#">Política de Privacidade</a>
+            </div>
+            <p>NexaKey © 2025. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
