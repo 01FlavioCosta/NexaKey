@@ -1,0 +1,61 @@
+<header class="header">
+    <div class="container">
+        <img src="https://i.imgur.com/g91x2fB.png" alt="NexaKey Logo" class="logo-wordmark">
+        <a href="#pricing" class="btn btn-primary">Comece de Graça</a>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container">
+        <h1>A chave para sua vida digital, finalmente em um só lugar.</h1>
+        <p>O NexaKey organiza e protege todas as suas senhas com segurança de nível militar. Recupere o controle e nunca mais clique em "Esqueceu sua senha?".</p>
+        <a href="#" class="btn btn-primary">Baixar o App</a>
+    </div>
+</section>
+
+<section class="benefits">
+    <div class="container">
+        <h2>Sua vida digital está um caos?</h2>
+        <div class="benefits-grid">
+            <div>
+                <h3>Anotações Inseguras</h3>
+                <p>Chega de usar blocos de notas. Centralize tudo com criptografia de ponta.</p>
+            </div>
+            <div>
+                <h3>Senhas Fracas</h3>
+                <p>O NexaKey gera e memoriza senhas invioláveis para cada uma de suas contas.</p>
+            </div>
+            <div>
+                <h3>Acesso Perdido</h3>
+                <p>Mantenha tudo seguro e acessível, sem perder o acesso a serviços pagos.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="security">
+    <div class="container">
+        <img src="https://i.imgur.com/gY9M0ZC.png" alt="NexaKey Cadeado" class="security-logo">
+        <h2>Nossa promessa: Conhecimento Zero.</h2>
+        <p>Seus dados são criptografados no seu dispositivo. Sua Senha Mestra nunca é enviada para nós. A chave é sua, e de mais ninguém.</p>
+    </div>
+</section>
+
+<section id="pricing" class="pricing">
+    <div class="container">
+        <h2>Comece de graça. Evolua quando quiser.</h2>
+        <p><strong>Plano Gratuito:</strong> Salve até 20 senhas em 1 dispositivo. Preço: Grátis.</p>
+        <p><strong>Plano NexaKey Plus:</strong> Itens ilimitados e sincronização em todos os seus dispositivos. Preço: R$ 9,90/mês.</p>
+        <p>Economize com o plano anual! Pague R$ 99,90 e ganhe 2 meses de graça.</p>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="container">
+        <p>NexaKey © 2025. Todos os direitos reservados.</p>
+        <div>
+            <a href="#">Termos de Serviço</a>
+            <a href="#">Política de Privacidade</a>
+        </div>
+    </div>
+</footer>
