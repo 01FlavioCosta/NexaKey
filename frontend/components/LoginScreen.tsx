@@ -11,9 +11,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import * as LocalAuthentication from 'expo-local-authentication';
 import { useAuth } from '../contexts/AuthContext';
 import { SecureStorageService } from '../utils/storage';
+import { BiometricsService } from '../utils/biometrics';
 
 export const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -22,8 +22,9 @@ export const LoginScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const [supportedBiometrics, setSupportedBiometrics] = useState<string[]>([]);
 
-  const { login } = useAuth();
+  const { login, setMasterKey } = useAuth();
 
   useEffect(() => {
     checkBiometricSupport();
@@ -32,12 +33,14 @@ export const LoginScreen = () => {
 
   const checkBiometricSupport = async () => {
     try {
-      const hasHardware = await LocalAuthentication.hasHardwareAsync();
-      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+      const isAvailable = await BiometricsService.isAvailable();
       const enabled = await SecureStorageService.isBiometricEnabled();
+      const types = await BiometricsService.getSupportedTypes();
+      const typeNames = types.map(type => BiometricsService.getBiometricTypeName(type));
       
-      setBiometricAvailable(hasHardware && isEnrolled);
-      setBiometricEnabled(enabled && hasHardware && isEnrolled);
+      setBiometricAvailable(isAvailable);
+      setBiometricEnabled(enabled && isAvailable);
+      setSupportedBiometrics(typeNames);
     } catch (error) {
       console.error('Biometric check error:', error);
     }
@@ -77,25 +80,31 @@ export const LoginScreen = () => {
 
   const handleBiometricLogin = async () => {
     try {
-      const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Authenticate to access NexaKey',
-        fallbackLabel: 'Use master password',
-        cancelLabel: 'Cancel',
-      });
-
-      if (result.success) {
-        // Mock biometric login - in real app, this would recover the encryption key
-        const storedKey = await SecureStorageService.getBiometricKey();
-        if (storedKey) {
+      setIsLoading(true);
+      const masterKey = await BiometricsService.biometricLogin();
+      
+      if (masterKey) {
+        // Set the master key and authenticate user
+        setMasterKey(masterKey);
+        
+        // Get stored user data and token
+        const userData = await SecureStorageService.getUserData();
+        const token = await SecureStorageService.getAccessToken();
+        
+        if (userData && token) {
+          // In a real app, you'd validate the token with the backend
           Alert.alert('Sucesso', 'Login biométrico realizado com sucesso!');
-          // Here you would restore the user session
         } else {
-          Alert.alert('Erro', 'Chave biométrica não encontrada. Use a senha mestra.');
+          throw new Error('Dados de usuário não encontrados');
         }
+      } else {
+        Alert.alert('Erro', 'Falha na autenticação biométrica');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Biometric authentication error:', error);
-      Alert.alert('Erro', 'Falha na autenticação biométrica');
+      Alert.alert('Erro', error.message || 'Falha na autenticação biométrica');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -120,13 +129,9 @@ export const LoginScreen = () => {
 
   const handleBiometricRecovery = async () => {
     try {
-      const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Confirme sua identidade para recuperar a conta',
-        fallbackLabel: 'Cancelar',
-        cancelLabel: 'Cancelar',
-      });
-
-      if (result.success) {
+      const success = await BiometricsService.biometricPasswordReset(email, '');
+      if (success) {
+        // Navigate to password reset form
         Alert.prompt(
           'Nova Senha Mestra',
           'Digite sua nova senha mestra:',
@@ -151,6 +156,117 @@ export const LoginScreen = () => {
       Alert.alert('Erro', 'Falha na recuperação biométrica');
     }
   };
+
+  const getBiometricButtonText = () => {
+    if (supportedBiometrics.length > 0) {
+      return `Usar ${supportedBiometrics.join(' / ')}`;
+    }
+    return 'Usar Biometria';
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoid}
+      >
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <View style={styles.logoContainer}>
+              <Ionicons name="shield-checkmark" size={60} color="#00D4FF" />
+            </View>
+            <Text style={styles.title}>NexaKey</Text>
+            <Text style={styles.subtitle}>Acesse seu cofre de senhas</Text>
+          </View>
+
+          <View style={styles.form}>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>E-mail</Text>
+              <TextInput
+                style={styles.input}
+                value={email}
+                onChangeText={setEmail}
+                placeholder="Digite seu e-mail"
+                placeholderTextColor="#666"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Senha Mestra</Text>
+              <View style={styles.passwordInputContainer}>
+                <TextInput
+                  style={[styles.input, styles.passwordInput]}
+                  value={masterPassword}
+                  onChangeText={setMasterPassword}
+                  placeholder="Digite sua senha mestra"
+                  placeholderTextColor="#666"
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                />
+                <TouchableOpacity
+                  style={styles.eyeButton}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  <Ionicons
+                    name={showPassword ? 'eye-off' : 'eye'}
+                    size={20}
+                    color="#666"
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <TouchableOpacity
+              style={styles.forgotPasswordButton}
+              onPress={handleForgotPassword}
+            >
+              <Text style={styles.forgotPasswordText}>
+                Esqueceu a Senha Mestra?
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
+              onPress={handleLogin}
+              disabled={isLoading}
+            >
+              <Text style={styles.loginButtonText}>
+                {isLoading ? 'Entrando...' : 'Entrar'}
+              </Text>
+            </TouchableOpacity>
+
+            {biometricEnabled && (
+              <TouchableOpacity
+                style={styles.biometricButton}
+                onPress={handleBiometricLogin}
+                disabled={isLoading}
+              >
+                <Ionicons name="finger-print" size={24} color="#00D4FF" />
+                <Text style={styles.biometricButtonText}>
+                  {getBiometricButtonText()}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>
+              Seus dados são protegidos com criptografia de ponta-a-ponta
+            </Text>
+            {biometricAvailable && !biometricEnabled && (
+              <Text style={styles.biometricHint}>
+                💡 Configure a biometria nas configurações para acesso mais rápido
+              </Text>
+            )}
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+};
 
   return (
     <SafeAreaView style={styles.container}>
