@@ -273,19 +273,26 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onBack }) => {
 
             <View style={styles.biometricContainer}>
               <View style={styles.biometricInfo}>
-                <Ionicons name="finger-print" size={24} color="#00D4FF" />
+                <Ionicons 
+                  name={biometricAvailable ? "finger-print" : "finger-print-outline"} 
+                  size={24} 
+                  color={biometricAvailable ? "#00D4FF" : "#666"} 
+                />
                 <View style={styles.biometricTextContainer}>
-                  <Text style={styles.biometricTitle}>Desbloqueio Biométrico</Text>
+                  <Text style={styles.biometricTitle}>
+                    Desbloqueio Biométrico {!biometricAvailable && '(Indisponível)'}
+                  </Text>
                   <Text style={styles.biometricDescription}>
-                    Permitir desbloqueio com impressão digital ou Face ID
+                    {getBiometricDescription()}
                   </Text>
                 </View>
               </View>
               <Switch
                 value={biometricEnabled}
-                onValueChange={setBiometricEnabled}
-                trackColor={{ false: '#333', true: '#00D4FF40' }}
-                thumbColor={biometricEnabled ? '#00D4FF' : '#666'}
+                onValueChange={handleBiometricToggle}
+                disabled={!biometricAvailable}
+                trackColor={{ false: '#333', true: biometricAvailable ? '#00D4FF40' : '#333' }}
+                thumbColor={biometricEnabled && biometricAvailable ? '#00D4FF' : '#666'}
               />
             </View>
 
