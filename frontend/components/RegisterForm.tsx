@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
 import { EncryptionService } from '../utils/encryption';
+import { BiometricsService } from '../utils/biometrics';
 
 interface RegisterFormProps {
   onBack: () => void;
@@ -29,8 +30,32 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onBack }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState<any>(null);
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [supportedBiometrics, setSupportedBiometrics] = useState<string[]>([]);
 
   const { register } = useAuth();
+
+  useEffect(() => {
+    checkBiometricSupport();
+  }, []);
+
+  const checkBiometricSupport = async () => {
+    try {
+      const isAvailable = await BiometricsService.isAvailable();
+      const types = await BiometricsService.getSupportedTypes();
+      const typeNames = types.map(type => BiometricsService.getBiometricTypeName(type));
+      
+      setBiometricAvailable(isAvailable);
+      setSupportedBiometrics(typeNames);
+      
+      // Auto-enable biometric if available
+      if (isAvailable) {
+        setBiometricEnabled(true);
+      }
+    } catch (error) {
+      console.error('Biometric check error:', error);
+    }
+  };
 
   const handlePasswordChange = (password: string) => {
     setMasterPassword(password);
@@ -78,6 +103,28 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onBack }) => {
     return true;
   };
 
+  const handleBiometricToggle = async (enabled: boolean) => {
+    if (enabled && biometricAvailable) {
+      // Test biometric authentication before enabling
+      const success = await BiometricsService.authenticate(
+        `Confirme sua ${supportedBiometrics.join(' ou ')} para ativar o desbloqueio biométrico`,
+        'Cancelar'
+      );
+      
+      if (success) {
+        setBiometricEnabled(true);
+        Alert.alert(
+          'Biometria Ativada',
+          'Você poderá usar sua biometria para acessar o NexaKey após o registro.'
+        );
+      } else {
+        setBiometricEnabled(false);
+      }
+    } else {
+      setBiometricEnabled(enabled);
+    }
+  };
+
   const handleRegister = async () => {
     if (!validateForm()) return;
 
@@ -104,6 +151,16 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onBack }) => {
     if (passwordStrength.score >= 3) return '#FF9800';
     if (passwordStrength.score >= 2) return '#FF5722';
     return '#F44336';
+  };
+
+  const getBiometricDescription = () => {
+    if (!biometricAvailable) {
+      return 'Configure a biometria nas configurações do dispositivo para usar esta funcionalidade';
+    }
+    if (supportedBiometrics.length > 0) {
+      return `Permitir desbloqueio com ${supportedBiometrics.join(' ou ')}`;
+    }
+    return 'Permitir desbloqueio com biometria';
   };
 
   return (
