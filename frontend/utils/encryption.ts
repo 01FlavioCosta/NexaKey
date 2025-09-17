@@ -1,20 +1,16 @@
 import CryptoJS from 'crypto-js';
-import { hash } from 'argon2-browser';
+import bcrypt from 'bcryptjs';
 
 export class EncryptionService {
-  // Generate a key from master password using Argon2
+  // Generate a key from master password using PBKDF2 (web-compatible alternative to Argon2)
   static async deriveKey(masterPassword: string, salt: string): Promise<string> {
     try {
-      const result = await hash({
-        pass: masterPassword,
-        salt: salt,
-        time: 3,
-        mem: 4096,
-        hashLen: 32,
-        parallelism: 1,
-        type: 0, // Argon2d
+      // Use PBKDF2 with high iteration count for key derivation
+      const key = CryptoJS.PBKDF2(masterPassword, salt, {
+        keySize: 256/32,
+        iterations: 100000
       });
-      return result.encoded;
+      return key.toString();
     } catch (error) {
       console.error('Key derivation failed:', error);
       throw new Error('Failed to derive encryption key');
@@ -52,19 +48,13 @@ export class EncryptionService {
     }
   }
 
-  // Hash master password for server storage
+  // Hash master password for server storage using bcrypt
   static async hashMasterPassword(password: string, salt: string): Promise<string> {
     try {
-      const result = await hash({
-        pass: password,
-        salt: salt,
-        time: 3,
-        mem: 4096,
-        hashLen: 32,
-        parallelism: 1,
-        type: 2, // Argon2id
-      });
-      return result.encoded;
+      // Use bcrypt with salt rounds for password hashing
+      const saltRounds = 12;
+      const hash = await bcrypt.hash(password + salt, saltRounds);
+      return hash;
     } catch (error) {
       console.error('Password hashing failed:', error);
       throw new Error('Failed to hash password');
