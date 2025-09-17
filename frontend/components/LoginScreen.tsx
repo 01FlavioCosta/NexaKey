@@ -485,4 +485,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 18,
   },
+  biometricHint: {
+    fontSize: 12,
+    color: '#00D4FF',
+    textAlign: 'center',
+    lineHeight: 18,
+    marginTop: 8,
+  },
 });
