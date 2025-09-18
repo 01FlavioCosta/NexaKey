@@ -305,6 +305,15 @@ export const VaultScreen = () => {
         visible={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
       />
+
+      {/* Settings Modal */}
+      <Modal
+        visible={showSettingsModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <SettingsScreen onClose={() => setShowSettingsModal(false)} />
+      </Modal>
     </SafeAreaView>
   );
 };
