@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
 import { VaultService } from '../services/VaultService';
+import { PasswordSecurityService } from '../utils/passwordSecurity';
 
 interface VaultItem {
   id: string;
@@ -42,6 +43,7 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showCvv, setShowCvv] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState<any>(null);
 
   const { masterKey } = useAuth();
   const vaultService = new VaultService();
