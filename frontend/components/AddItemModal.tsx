@@ -213,6 +213,49 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
           <Ionicons name="refresh" size={16} color="#00D4FF" />
           <Text style={styles.generateButtonText}>Gerar Senha Forte</Text>
         </TouchableOpacity>
+
+        {/* Password strength indicator */}
+        {passwordStrength && formData.password && (
+          <View style={styles.strengthContainer}>
+            <View style={styles.strengthHeader}>
+              <Text style={styles.strengthLabel}>Força da Senha:</Text>
+              <Text style={[
+                styles.strengthValue,
+                { color: getPasswordStrengthColor(passwordStrength.strength) }
+              ]}>
+                {passwordStrength.strength}
+              </Text>
+            </View>
+            
+            <View style={styles.strengthBar}>
+              <View style={[
+                styles.strengthFill,
+                {
+                  width: `${(passwordStrength.score / 6) * 100}%`,
+                  backgroundColor: getPasswordStrengthColor(passwordStrength.strength),
+                }
+              ]} />
+            </View>
+
+            {passwordStrength.isCompromised && (
+              <View style={styles.warningContainer}>
+                <Ionicons name="warning" size={16} color="#FF5722" />
+                <Text style={styles.warningText}>
+                  ⚠️ Esta senha foi comprometida em vazamentos de dados
+                </Text>
+              </View>
+            )}
+
+            {passwordStrength.issues.length > 0 && (
+              <View style={styles.issuesContainer}>
+                <Text style={styles.issuesTitle}>Sugestões:</Text>
+                {passwordStrength.recommendations.slice(0, 2).map((rec: string, index: number) => (
+                  <Text key={index} style={styles.issueText}>• {rec}</Text>
+                ))}
+              </View>
+            )}
+          </View>
+        )}
       </View>
 
       <View style={styles.inputContainer}>
