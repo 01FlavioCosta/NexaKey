@@ -8,6 +8,7 @@ import {
   TextInput,
   RefreshControl,
   Alert,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,6 +17,7 @@ import { VaultService } from '../services/VaultService';
 import { AddItemModal } from './AddItemModal';
 import { VaultItemCard } from './VaultItemCard';
 import { PremiumUpgradeModal } from './PremiumUpgradeModal';
+import { SettingsScreen } from './SettingsScreen';
 
 interface VaultItem {
   id: string;
@@ -34,6 +36,7 @@ export const VaultScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [editingItem, setEditingItem] = useState<VaultItem | null>(null);
 
   const vaultService = new VaultService();
