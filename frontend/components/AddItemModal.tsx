@@ -91,8 +91,30 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
   };
 
   const generatePassword = () => {
-    const newPassword = vaultService.generateStrongPassword(16, true);
+    const newPassword = PasswordSecurityService.generateSecurePassword(16, true, true);
     setFormData({ ...formData, password: newPassword });
+    
+    // Analisar a força da nova senha
+    const analysis = PasswordSecurityService.analyzePassword(newPassword);
+    setPasswordStrength(analysis);
+    
+    // Mostrar informações sobre a senha gerada
+    const crackTime = PasswordSecurityService.estimateCrackTime(newPassword);
+    Alert.alert(
+      'Senha Forte Gerada!',
+      `Força: ${analysis.strength}\nTempo estimado para quebrar: ${crackTime}`,
+      [{ text: 'OK' }]
+    );
+  };
+
+  const handlePasswordChange = (password: string) => {
+    setFormData({ ...formData, password });
+    if (password && selectedType === 'password') {
+      const analysis = PasswordSecurityService.analyzePassword(password, formData.name);
+      setPasswordStrength(analysis);
+    } else {
+      setPasswordStrength(null);
+    }
   };
 
   const validateForm = (): boolean => {
