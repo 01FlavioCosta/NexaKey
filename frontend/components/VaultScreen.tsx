@@ -170,8 +170,8 @@ export const VaultScreen = () => {
               {user?.is_premium ? 'NexaKey Plus' : `${items.length} de 20 itens usados`}
             </Text>
           </View>
-          <TouchableOpacity style={styles.profileButton} onPress={logout}>
-            <Ionicons name="person-circle" size={32} color="#00D4FF" />
+          <TouchableOpacity style={styles.profileButton} onPress={() => setShowSettingsModal(true)}>
+            <Ionicons name="settings" size={28} color="#00D4FF" />
           </TouchableOpacity>
         </View>
 
