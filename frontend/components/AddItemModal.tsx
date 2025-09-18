@@ -191,7 +191,7 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
           <TextInput
             style={[styles.input, styles.passwordInput]}
             value={formData.password || ''}
-            onChangeText={(text) => setFormData({ ...formData, password: text })}
+            onChangeText={handlePasswordChange}
             placeholder="Digite a senha"
             placeholderTextColor="#666"
             secureTextEntry={!showPassword}
