@@ -629,4 +629,61 @@ const styles = StyleSheet.create({
   halfWidth: {
     flex: 1,
   },
+  strengthContainer: {
+    marginTop: 12,
+    padding: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: 8,
+  },
+  strengthHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  strengthLabel: {
+    fontSize: 14,
+    color: '#B0BEC5',
+    fontWeight: '500',
+  },
+  strengthValue: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  strengthBar: {
+    height: 4,
+    backgroundColor: '#333',
+    borderRadius: 2,
+    marginBottom: 12,
+  },
+  strengthFill: {
+    height: '100%',
+    borderRadius: 2,
+  },
+  warningContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  warningText: {
+    flex: 1,
+    marginLeft: 8,
+    fontSize: 12,
+    color: '#FF5722',
+    fontWeight: '500',
+  },
+  issuesContainer: {
+    marginTop: 8,
+  },
+  issuesTitle: {
+    fontSize: 12,
+    color: '#B0BEC5',
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  issueText: {
+    fontSize: 12,
+    color: '#B0BEC5',
+    marginBottom: 2,
+  },
 });
