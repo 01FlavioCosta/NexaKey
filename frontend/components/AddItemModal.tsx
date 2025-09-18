@@ -117,6 +117,17 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
     }
   };
 
+  const getPasswordStrengthColor = (strength: string) => {
+    switch (strength) {
+      case 'Muito Forte': return '#4CAF50';
+      case 'Forte': return '#8BC34A';
+      case 'Moderada': return '#FF9800';
+      case 'Fraca': return '#FF5722';
+      case 'Muito Fraca': return '#F44336';
+      default: return '#666';
+    }
+  };
+
   const validateForm = (): boolean => {
     if (!formData.name?.trim()) {
       Alert.alert('Erro', 'Nome é obrigatório');
