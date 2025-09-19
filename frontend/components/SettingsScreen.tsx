@@ -15,6 +15,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { BiometricsService } from '../utils/biometrics';
 import { SecureStorageService } from '../utils/storage';
 import { PremiumUpgradeModal } from './PremiumUpgradeModal';
+import { SecurityAuditScreen } from './SecurityAuditScreen';
 
 interface SettingsScreenProps {
   onClose: () => void;
@@ -26,6 +27,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onClose }) => {
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [supportedBiometrics, setSupportedBiometrics] = useState<string[]>([]);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showSecurityAudit, setShowSecurityAudit] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
