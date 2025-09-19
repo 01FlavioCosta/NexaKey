@@ -120,11 +120,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onClose }) => {
       return;
     }
 
-    Alert.alert(
-      'Auditoria de Segurança',
-      'Análise de senhas fracas, reutilizadas ou comprometidas. Funcionalidade em desenvolvimento.',
-      [{ text: 'OK' }]
-    );
+    setShowSecurityAudit(true);
   };
 
   const handleDeleteAccount = () => {
