@@ -356,6 +356,14 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onClose }) => {
         visible={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
       />
+
+      <Modal
+        visible={showSecurityAudit}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <SecurityAuditScreen onClose={() => setShowSecurityAudit(false)} />
+      </Modal>
     </SafeAreaView>
   );
 };
