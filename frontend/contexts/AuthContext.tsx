@@ -100,6 +100,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Derive encryption key for client-side encryption
       const encryptionKey = await EncryptionService.deriveKey(password, salt);
 
+      console.log('Registering user with email:', email);
+
       const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
@@ -112,12 +114,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }),
       });
 
+      const responseText = await response.text();
+      console.log('Registration response:', response.status, responseText);
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Registration failed');
+        let errorMessage = 'Falha no registro';
+        try {
+          const error = JSON.parse(responseText);
+          errorMessage = error.detail || errorMessage;
+        } catch (parseError) {
+          console.error('Error parsing response:', parseError);
+          errorMessage = `Erro ${response.status}: ${responseText}`;
+        }
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json();
+      const data = JSON.parse(responseText);
       
       // Store user data and tokens
       await SecureStorageService.storeAccessToken(data.access_token);
@@ -134,6 +146,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(data.user);
       setMasterKeyState(encryptionKey);
       setIsFirstTime(false);
+      
+      console.log('Registration successful for:', email);
     } catch (error) {
       console.error('Registration error:', error);
       throw error;
