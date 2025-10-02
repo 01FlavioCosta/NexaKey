@@ -19,9 +19,10 @@ import { BiometricsService } from '../utils/biometrics';
 
 interface RegisterFormProps {
   onBack: () => void;
+  onShowLogin?: () => void; // Add option to show login
 }
 
-export const RegisterForm: React.FC<RegisterFormProps> = ({ onBack }) => {
+export const RegisterForm: React.FC<RegisterFormProps> = ({ onBack, onShowLogin }) => {
   const [email, setEmail] = useState('');
   const [masterPassword, setMasterPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
