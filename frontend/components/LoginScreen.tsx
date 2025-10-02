@@ -15,7 +15,11 @@ import { useAuth } from '../contexts/AuthContext';
 import { SecureStorageService } from '../utils/storage';
 import { BiometricsService } from '../utils/biometrics';
 
-export const LoginScreen = () => {
+interface LoginScreenProps {
+  onShowRegister?: () => void;
+}
+
+export const LoginScreen: React.FC<LoginScreenProps> = ({ onShowRegister }) => {
   const [email, setEmail] = useState('');
   const [masterPassword, setMasterPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
