@@ -159,18 +159,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string): Promise<void> => {
     try {
       setIsLoading(true);
+      console.log('Starting login process for:', email);
 
-      // Get stored salt
-      const salt = await SecureStorageService.getUserSalt();
+      // Get stored salt - this is critical for consistency
+      let salt = await SecureStorageService.getUserSalt();
+      
       if (!salt) {
-        throw new Error('User salt not found. Please register again.');
+        console.log('No salt found, generating new one');
+        // If no salt is stored, we need to handle this case
+        // For now, let's try with a fallback approach
+        Alert.alert(
+          'Dados Não Encontrados',
+          'Não foi possível encontrar os dados de login. Você precisará se registrar novamente.',
+          [{ text: 'OK' }]
+        );
+        setIsFirstTime(true);
+        return;
       }
 
-      // Hash password for server verification
+      console.log('Using stored salt for login');
+
+      // Hash password for server verification - ensure consistency
       const masterPasswordHash = await EncryptionService.hashMasterPassword(password, salt);
       
-      // Derive encryption key
+      // Derive encryption key - must be identical to registration
       const encryptionKey = await EncryptionService.deriveKey(password, salt);
+
+      console.log('Attempting login with hashed password');
 
       const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
@@ -183,12 +198,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }),
       });
 
+      const responseText = await response.text();
+      console.log('Login response:', response.status, responseText);
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Login failed');
+        let errorMessage = 'Credenciais inválidas';
+        try {
+          const error = JSON.parse(responseText);
+          errorMessage = error.detail || errorMessage;
+        } catch (parseError) {
+          console.error('Error parsing login response:', parseError);
+        }
+        
+        if (response.status === 401) {
+          // Clear potentially corrupted data
+          console.log('Login failed - clearing stored data');
+          await SecureStorageService.clearAllData();
+          setIsFirstTime(true);
+          errorMessage = 'Credenciais inválidas. Dados locais foram limpos. Tente se registrar novamente.';
+        }
+        
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json();
+      const data = JSON.parse(responseText);
+      console.log('Login successful');
       
       // Store user data and tokens
       await SecureStorageService.storeAccessToken(data.access_token);
@@ -197,6 +231,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       setUser(data.user);
       setMasterKeyState(encryptionKey);
+      
+      console.log('Login completed successfully');
     } catch (error) {
       console.error('Login error:', error);
       throw error;
