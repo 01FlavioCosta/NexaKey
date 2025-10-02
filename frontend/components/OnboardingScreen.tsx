@@ -124,6 +124,16 @@ export const OnboardingScreen = () => {
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Login link */}
+      <View style={styles.loginLinkContainer}>
+        <TouchableOpacity 
+          style={styles.loginLink}
+          onPress={() => setShowRegister(true)} // This will skip to registration, which has back button
+        >
+          <Text style={styles.loginLinkText}>Já tenho uma conta</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
