@@ -373,6 +373,35 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
         </View>
       </View>
 
+      {/* Campo de Senha/PIN do Cartão */}
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Senha/PIN do Cartão</Text>
+        <View style={styles.passwordInputContainer}>
+          <TextInput
+            style={[styles.input, styles.passwordInput]}
+            value={formData.cardPassword || ''}
+            onChangeText={(text) => setFormData({ ...formData, cardPassword: text })}
+            placeholder="Digite a senha do cartão"
+            placeholderTextColor="#666"
+            keyboardType="numeric"
+            secureTextEntry={!showPassword}
+          />
+          <TouchableOpacity
+            style={styles.eyeButton}
+            onPress={() => setShowPassword(!showPassword)}
+          >
+            <Ionicons
+              name={showPassword ? 'eye-off' : 'eye'}
+              size={20}
+              color="#666"
+            />
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.fieldHint}>
+          💡 Senha numérica usada em caixas eletrônicos e compras
+        </Text>
+      </View>
+
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Notas</Text>
         <TextInput
