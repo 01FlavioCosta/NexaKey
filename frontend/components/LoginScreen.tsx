@@ -127,7 +127,30 @@ export const LoginScreen = () => {
     }
   };
 
-  const handleBiometricRecovery = async () => {
+  const handleClearData = () => {
+    Alert.alert(
+      'Limpar Todos os Dados',
+      'Esta ação irá remover todos os dados locais e permitir um novo registro. Você perderá acesso a senhas salvas anteriormente. Tem certeza?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Limpar Dados',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await SecureStorageService.clearAllData();
+              Alert.alert('Sucesso', 'Dados limpos. Você pode se registrar novamente.', [
+                { text: 'OK', onPress: () => window.location.reload() }
+              ]);
+            } catch (error) {
+              console.error('Error clearing data:', error);
+              Alert.alert('Erro', 'Falha ao limpar dados');
+            }
+          },
+        },
+      ]
+    );
+  };
     try {
       const success = await BiometricsService.biometricPasswordReset(email, '');
       if (success) {
