@@ -22,29 +22,46 @@ export class EncryptionService {
     return CryptoJS.lib.WordArray.random(16).toString();
   }
 
-  // Encrypt data with AES-256
+  // Encrypt data with AES-256 - improved version to handle UTF-8 properly
   static encrypt(data: string, key: string): string {
     try {
-      const encrypted = CryptoJS.AES.encrypt(data, key).toString();
-      return encrypted;
+      // Ensure the data is properly encoded as UTF-8
+      const utf8Data = CryptoJS.enc.Utf8.parse(data);
+      const encrypted = CryptoJS.AES.encrypt(utf8Data, key, {
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7
+      });
+      
+      console.log('Encryption successful');
+      return encrypted.toString();
     } catch (error) {
       console.error('Encryption failed:', error);
       throw new Error('Failed to encrypt data');
     }
   }
 
-  // Decrypt data with AES-256
+  // Decrypt data with AES-256 - improved version to handle UTF-8 properly
   static decrypt(encryptedData: string, key: string): string {
     try {
-      const bytes = CryptoJS.AES.decrypt(encryptedData, key);
-      const decrypted = bytes.toString(CryptoJS.enc.Utf8);
-      if (!decrypted) {
-        throw new Error('Invalid decryption key');
+      console.log('Attempting to decrypt data...');
+      
+      const decrypted = CryptoJS.AES.decrypt(encryptedData, key, {
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7
+      });
+      
+      // Convert to UTF-8 string
+      const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
+      
+      if (!decryptedString) {
+        throw new Error('Invalid decryption key or corrupted data');
       }
-      return decrypted;
+      
+      console.log('Decryption successful');
+      return decryptedString;
     } catch (error) {
       console.error('Decryption failed:', error);
-      throw new Error('Failed to decrypt data');
+      throw new Error('Failed to decrypt data - invalid key or corrupted data');
     }
   }
 
