@@ -129,7 +129,10 @@ export const OnboardingScreen = () => {
       <View style={styles.loginLinkContainer}>
         <TouchableOpacity 
           style={styles.loginLink}
-          onPress={() => setShowRegister(true)} // This will skip to registration, which has back button
+          onPress={() => {
+            // IR DIRETO PARA LOGIN, NÃO REGISTRO
+            setIsFirstTime(false); // Marca que não é primeira vez
+          }}
         >
           <Text style={styles.loginLinkText}>Já tenho uma conta</Text>
         </TouchableOpacity>
