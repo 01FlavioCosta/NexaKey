@@ -1,5 +1,8 @@
-import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
+
+// Para web, vamos usar apenas AsyncStorage, pois SecureStore não funciona
+const isWeb = Platform.OS === 'web';
 
 export class SecureStorageService {
   // Secure storage keys
@@ -12,53 +15,36 @@ export class SecureStorageService {
     BIOMETRIC_ENABLED: 'biometric_enabled',
   };
 
-  // Store sensitive data in secure storage
+  // Store sensitive data - always use AsyncStorage for web compatibility
   static async setSecureItem(key: string, value: string): Promise<void> {
     try {
-      if (SecureStore.setItemAsync) {
-        await SecureStore.setItemAsync(key, value);
-      } else {
-        // Fallback to AsyncStorage if SecureStore is not available
-        await AsyncStorage.setItem(`secure_${key}`, value);
-      }
-    } catch (error) {
-      console.error('Secure storage write failed:', error);
-      // Fallback to AsyncStorage
       await AsyncStorage.setItem(`secure_${key}`, value);
+      console.log(`Stored secure item: ${key}`);
+    } catch (error) {
+      console.error('Storage write failed:', error);
+      throw new Error('Failed to store secure data');
     }
   }
 
-  // Retrieve sensitive data from secure storage
+  // Retrieve sensitive data - always use AsyncStorage for web compatibility
   static async getSecureItem(key: string): Promise<string | null> {
     try {
-      if (SecureStore.getItemAsync) {
-        return await SecureStore.getItemAsync(key);
-      } else {
-        // Fallback to AsyncStorage if SecureStore is not available
-        return await AsyncStorage.getItem(`secure_${key}`);
-      }
+      const value = await AsyncStorage.getItem(`secure_${key}`);
+      console.log(`Retrieved secure item: ${key}, exists: ${!!value}`);
+      return value;
     } catch (error) {
-      console.error('Secure storage read failed:', error);
-      // Fallback to AsyncStorage
-      try {
-        return await AsyncStorage.getItem(`secure_${key}`);
-      } catch (fallbackError) {
-        console.error('AsyncStorage fallback failed:', fallbackError);
-        return null;
-      }
+      console.error('Storage read failed:', error);
+      return null;
     }
   }
 
-  // Delete item from secure storage
+  // Delete item from storage
   static async deleteSecureItem(key: string): Promise<void> {
     try {
-      if (SecureStore.deleteItemAsync) {
-        await SecureStore.deleteItemAsync(key);
-      }
-      // Also try to delete from AsyncStorage fallback
       await AsyncStorage.removeItem(`secure_${key}`);
+      console.log(`Deleted secure item: ${key}`);
     } catch (error) {
-      console.error('Secure storage delete failed:', error);
+      console.error('Storage delete failed:', error);
     }
   }
 
