@@ -151,7 +151,8 @@ export const LoginScreen = () => {
       ]
     );
   };
-    try {
+
+  const handleBiometricRecovery = async () => {
       const success = await BiometricsService.biometricPasswordReset(email, '');
       if (success) {
         // Navigate to password reset form
