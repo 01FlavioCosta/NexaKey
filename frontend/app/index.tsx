@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, StatusBar } from 'react-native';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { OnboardingScreen } from '../components/OnboardingScreen';
-import { LoginScreen } from '../components/LoginScreen';
+import { LoginRegisterFlow } from '../components/LoginRegisterFlow';
 import { VaultScreen } from '../components/VaultScreen';
 import { LoadingScreen } from '../components/LoadingScreen';
 
@@ -33,9 +33,9 @@ const AppContent = () => {
     return <VaultScreen />;
   }
 
-  // Otherwise show login screen
-  console.log('🔑 Showing login screen');
-  return <LoginScreen />;
+  // Otherwise show login/register flow
+  console.log('🔑 Showing login/register flow');
+  return <LoginRegisterFlow />;
 };
 
 export default function App() {
