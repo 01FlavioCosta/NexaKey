@@ -15,27 +15,48 @@ export class SecureStorageService {
   // Store sensitive data in secure storage
   static async setSecureItem(key: string, value: string): Promise<void> {
     try {
-      await SecureStore.setItemAsync(key, value);
+      if (SecureStore.setItemAsync) {
+        await SecureStore.setItemAsync(key, value);
+      } else {
+        // Fallback to AsyncStorage if SecureStore is not available
+        await AsyncStorage.setItem(`secure_${key}`, value);
+      }
     } catch (error) {
       console.error('Secure storage write failed:', error);
-      throw new Error('Failed to store secure data');
+      // Fallback to AsyncStorage
+      await AsyncStorage.setItem(`secure_${key}`, value);
     }
   }
 
   // Retrieve sensitive data from secure storage
   static async getSecureItem(key: string): Promise<string | null> {
     try {
-      return await SecureStore.getItemAsync(key);
+      if (SecureStore.getItemAsync) {
+        return await SecureStore.getItemAsync(key);
+      } else {
+        // Fallback to AsyncStorage if SecureStore is not available
+        return await AsyncStorage.getItem(`secure_${key}`);
+      }
     } catch (error) {
       console.error('Secure storage read failed:', error);
-      return null;
+      // Fallback to AsyncStorage
+      try {
+        return await AsyncStorage.getItem(`secure_${key}`);
+      } catch (fallbackError) {
+        console.error('AsyncStorage fallback failed:', fallbackError);
+        return null;
+      }
     }
   }
 
   // Delete item from secure storage
   static async deleteSecureItem(key: string): Promise<void> {
     try {
-      await SecureStore.deleteItemAsync(key);
+      if (SecureStore.deleteItemAsync) {
+        await SecureStore.deleteItemAsync(key);
+      }
+      // Also try to delete from AsyncStorage fallback
+      await AsyncStorage.removeItem(`secure_${key}`);
     } catch (error) {
       console.error('Secure storage delete failed:', error);
     }
