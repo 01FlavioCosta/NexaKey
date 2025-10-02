@@ -715,4 +715,10 @@ const styles = StyleSheet.create({
     color: '#B0BEC5',
     marginBottom: 2,
   },
+  fieldHint: {
+    fontSize: 12,
+    color: '#B0BEC5',
+    marginTop: 4,
+    fontStyle: 'italic',
+  },
 });
