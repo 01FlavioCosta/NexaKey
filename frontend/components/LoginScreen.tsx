@@ -299,6 +299,17 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onShowRegister }) => {
                 Problemas com login? Limpar dados locais
               </Text>
             </TouchableOpacity>
+
+            {onShowRegister && (
+              <TouchableOpacity
+                style={styles.registerLink}
+                onPress={onShowRegister}
+              >
+                <Text style={styles.registerLinkText}>
+                  Não tem conta? Criar conta
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </KeyboardAvoidingView>
