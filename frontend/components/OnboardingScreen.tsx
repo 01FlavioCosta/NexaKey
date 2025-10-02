@@ -232,4 +232,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  loginLinkContainer: {
+    paddingHorizontal: 32,
+    paddingBottom: 16,
+    alignItems: 'center',
+  },
+  loginLink: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+  },
+  loginLinkText: {
+    color: '#00D4FF',
+    fontSize: 16,
+    fontWeight: '500',
+    textDecorationLine: 'underline',
+  },
 });
