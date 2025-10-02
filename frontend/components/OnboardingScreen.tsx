@@ -44,6 +44,17 @@ export const OnboardingScreen = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [showRegister, setShowRegister] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
+  const [isFirstTime, setIsFirstTime] = useState(() => {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      return localStorage.getItem("isFirstTime") === "false" ? false : true;
+    }
+    return true;
+  });
+
+  const navigateToLogin = () => {
+    setShowRegister(false);
+    // Force show login by setting user context appropriately
+  };
 
   const nextPage = () => {
     if (currentPage < onboardingData.length - 1) {
