@@ -43,41 +43,70 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const initializeAuth = async () => {
     try {
+      console.log('Initializing authentication...');
+      
       // Check if user has been through onboarding
       const userData = await SecureStorageService.getUserData();
       const token = await SecureStorageService.getAccessToken();
+      const salt = await SecureStorageService.getUserSalt();
       
-      if (!userData) {
+      console.log('Auth data check:', { hasUserData: !!userData, hasToken: !!token, hasSalt: !!salt });
+
+      if (!userData || !salt) {
+        console.log('No user data or salt found, showing onboarding');
         setIsFirstTime(true);
         setIsLoading(false);
         return;
       }
 
       if (token && userData) {
-        // Validate token with backend
-        const response = await fetch(`${API_BASE_URL}/api/user/profile`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
+        try {
+          // Validate token with backend
+          const response = await fetch(`${API_BASE_URL}/api/user/profile`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
 
-        if (response.ok) {
-          const userProfile = await response.json();
-          setUser(userProfile);
-          
-          // Try to restore master key
-          const storedKey = await SecureStorageService.getMasterKey();
-          if (storedKey) {
-            setMasterKeyState(storedKey);
+          if (response.ok) {
+            const userProfile = await response.json();
+            setUser(userProfile);
+            console.log('User profile validated successfully');
+            
+            // Try to restore master key
+            const storedKey = await SecureStorageService.getMasterKey();
+            if (storedKey) {
+              setMasterKeyState(storedKey);
+              console.log('Master key restored successfully');
+            } else {
+              console.log('No master key found in storage');
+            }
+          } else {
+            console.log('Token validation failed:', response.status);
+            // Token invalid, clear stored data
+            await SecureStorageService.clearAllData();
+            setIsFirstTime(true);
           }
-        } else {
-          // Token invalid, clear stored data
+        } catch (error) {
+          console.error('Error validating token:', error);
+          // Network or other error, clear data to be safe
           await SecureStorageService.clearAllData();
+          setIsFirstTime(true);
         }
+      } else {
+        console.log('Missing token or user data');
+        setIsFirstTime(true);
       }
     } catch (error) {
       console.error('Auth initialization error:', error);
+      // Clear everything on initialization error
+      try {
+        await SecureStorageService.clearAllData();
+      } catch (clearError) {
+        console.error('Error clearing data:', clearError);
+      }
+      setIsFirstTime(true);
     } finally {
       setIsLoading(false);
     }
