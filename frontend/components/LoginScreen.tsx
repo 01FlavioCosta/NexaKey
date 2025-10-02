@@ -284,6 +284,15 @@ export const LoginScreen = () => {
                 💡 Configure a biometria nas configurações para acesso mais rápido
               </Text>
             )}
+            
+            <TouchableOpacity
+              style={styles.clearDataButton}
+              onPress={handleClearData}
+            >
+              <Text style={styles.clearDataText}>
+                Problemas com login? Limpar dados locais
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </KeyboardAvoidingView>
