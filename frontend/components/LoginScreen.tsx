@@ -426,4 +426,15 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     marginTop: 8,
   },
+  clearDataButton: {
+    marginTop: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  clearDataText: {
+    fontSize: 12,
+    color: '#FF5722',
+    textAlign: 'center',
+    textDecorationLine: 'underline',
+  },
 });
