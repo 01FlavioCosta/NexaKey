@@ -143,21 +143,51 @@ export const VaultItemCard: React.FC<VaultItemCardProps> = ({
             </View>
             <View style={styles.fieldContainer}>
               <Text style={styles.fieldLabel}>CVV:</Text>
-              <Text style={styles.fieldValue}>
-                {showPassword ? data.cvv || 'N/A' : '•••'}
-              </Text>
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => setShowPassword(!showPassword)}
-              >
-                <Ionicons
-                  name={showPassword ? 'eye-off' : 'eye'}
-                  size={16}
-                  color="#00D4FF"
-                />
-              </TouchableOpacity>
+              <View style={styles.passwordRow}>
+                <Text style={styles.fieldValue}>
+                  {showPassword ? data.cvv || 'N/A' : '•••'}
+                </Text>
+                <TouchableOpacity
+                  style={styles.actionButton}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  <Ionicons
+                    name={showPassword ? 'eye-off' : 'eye'}
+                    size={16}
+                    color="#00D4FF"
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
+
+          {/* Campo da Senha do Cartão */}
+          {data.cardPassword && (
+            <View style={styles.fieldContainer}>
+              <Text style={styles.fieldLabel}>Senha do Cartão:</Text>
+              <View style={styles.passwordRow}>
+                <Text style={styles.passwordText}>
+                  {showPassword ? data.cardPassword : '••••••'}
+                </Text>
+                <TouchableOpacity
+                  style={styles.actionButton}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  <Ionicons
+                    name={showPassword ? 'eye-off' : 'eye'}
+                    size={16}
+                    color="#00D4FF"
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.actionButton}
+                  onPress={() => copyToClipboard(data.cardPassword, 'Senha do cartão')}
+                >
+                  <Ionicons name="copy" size={16} color="#00D4FF" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
         </View>
       </View>
     );
