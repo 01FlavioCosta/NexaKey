@@ -44,6 +44,7 @@ export class VaultService {
 
   async getVaultItems(masterKey: string): Promise<DecryptedVaultItem[]> {
     try {
+      console.log('Getting vault items with master key...');
       const headers = await this.getAuthHeaders();
       const response = await fetch(`${API_BASE_URL}/api/vault/items`, {
         headers,
@@ -54,12 +55,14 @@ export class VaultService {
       }
 
       const encryptedItems: VaultItem[] = await response.json();
+      console.log(`Retrieved ${encryptedItems.length} encrypted items from server`);
       
       // Decrypt items client-side
       const decryptedItems: DecryptedVaultItem[] = [];
       
       for (const item of encryptedItems) {
         try {
+          console.log(`Attempting to decrypt item: ${item.id}`);
           const decryptedDataStr = EncryptionService.decrypt(item.encrypted_data, masterKey);
           const decryptedData = JSON.parse(decryptedDataStr);
           
@@ -70,12 +73,22 @@ export class VaultService {
             created_at: item.created_at,
             updated_at: item.updated_at,
           });
+          console.log(`Successfully decrypted item: ${item.id}`);
         } catch (decryptError) {
-          console.error('Failed to decrypt item:', item.id, decryptError);
-          // Skip items that can't be decrypted
+          console.error(`Failed to decrypt item: ${item.id}`, decryptError);
+          
+          // Instead of skipping, let's try to delete corrupted items
+          try {
+            console.log(`Attempting to delete corrupted item: ${item.id}`);
+            await this.deleteVaultItem(item.id);
+            console.log(`Deleted corrupted item: ${item.id}`);
+          } catch (deleteError) {
+            console.error(`Failed to delete corrupted item: ${item.id}`, deleteError);
+          }
         }
       }
 
+      console.log(`Successfully decrypted ${decryptedItems.length} items`);
       return decryptedItems;
     } catch (error) {
       console.error('VaultService.getVaultItems error:', error);
