@@ -103,67 +103,97 @@ async def get_current_user(token: str = Depends(security)):
 # Authentication Routes
 @api_router.post("/auth/register", response_model=LoginResponse)
 async def register_user(user_data: UserCreate):
-    # Check if user already exists
-    existing_user = await db.users.find_one({"email": user_data.email})
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
-    
-    # Create user
-    user_id = str(uuid.uuid4())
-    user_doc = {
-        "_id": user_id,
-        "email": user_data.email,
-        "master_password_hash": user_data.master_password_hash,
-        "biometric_enabled": user_data.biometric_enabled,
-        "is_premium": False,
-        "created_at": datetime.utcnow()
-    }
-    
-    await db.users.insert_one(user_doc)
-    
-    # Create access token
-    access_token = create_access_token({"sub": user_id})
-    
-    # Return response
-    user_response = UserResponse(
-        id=user_id,
-        email=user_data.email,
-        biometric_enabled=user_data.biometric_enabled,
-        vault_items_count=0,
-        is_premium=False,
-        created_at=user_doc["created_at"]
-    )
-    
-    return LoginResponse(access_token=access_token, user=user_response)
+    try:
+        # Check if user already exists
+        existing_user = await db.users.find_one({"email": user_data.email})
+        if existing_user:
+            # For demo purposes, we'll allow re-registration by updating the existing user
+            # In production, this should return an error
+            user_id = existing_user["_id"]
+            
+            # Update existing user
+            await db.users.update_one(
+                {"_id": user_id},
+                {"$set": {
+                    "master_password_hash": user_data.master_password_hash,
+                    "biometric_enabled": user_data.biometric_enabled,
+                    "updated_at": datetime.utcnow()
+                }}
+            )
+            
+            print(f"Updated existing user: {user_data.email}")
+        else:
+            # Create new user
+            user_id = str(uuid.uuid4())
+            user_doc = {
+                "_id": user_id,
+                "email": user_data.email,
+                "master_password_hash": user_data.master_password_hash,
+                "biometric_enabled": user_data.biometric_enabled,
+                "is_premium": False,
+                "created_at": datetime.utcnow()
+            }
+            
+            await db.users.insert_one(user_doc)
+            print(f"Created new user: {user_data.email}")
+        
+        # Create access token
+        access_token = create_access_token({"sub": user_id})
+        
+        # Get updated user data
+        user = await db.users.find_one({"_id": user_id})
+        
+        # Return response
+        user_response = UserResponse(
+            id=user_id,
+            email=user_data.email,
+            biometric_enabled=user_data.biometric_enabled,
+            vault_items_count=0,
+            is_premium=False,
+            created_at=user["created_at"]
+        )
+        
+        return LoginResponse(access_token=access_token, user=user_response)
+        
+    except Exception as e:
+        print(f"Registration error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Registration failed: {str(e)}")
 
 @api_router.post("/auth/login", response_model=LoginResponse)
 async def login_user(login_data: LoginRequest):
-    # Find user
-    user = await db.users.find_one({"email": login_data.email})
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    
-    # Verify password hash (client sends already hashed password)
-    if user["master_password_hash"] != login_data.master_password_hash:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    
-    # Get vault items count
-    vault_count = await db.vault_items.count_documents({"user_id": user["_id"]})
-    
-    # Create access token
-    access_token = create_access_token({"sub": user["_id"]})
-    
-    # Return response
-    user_response = UserResponse(
-        id=user["_id"],
-        email=user["email"],
-        biometric_enabled=user.get("biometric_enabled", False),
-        vault_items_count=vault_count,
-        is_premium=user.get("is_premium", False),
-        created_at=user["created_at"]
-    )
-    
-    return LoginResponse(access_token=access_token, user=user_response)
+    try:
+        # Find user
+        user = await db.users.find_one({"email": login_data.email})
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+        
+        # Verify password hash (client sends already hashed password)
+        if user["master_password_hash"] != login_data.master_password_hash:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+        
+        # Get vault items count
+        vault_count = await db.vault_items.count_documents({"user_id": user["_id"]})
+        
+        # Create access token
+        access_token = create_access_token({"sub": user["_id"]})
+        
+        # Return response
+        user_response = UserResponse(
+            id=user["_id"],
+            email=user["email"],
+            biometric_enabled=user.get("biometric_enabled", False),
+            vault_items_count=vault_count,
+            is_premium=user.get("is_premium", False),
+            created_at=user["created_at"]
+        )
+        
+        return LoginResponse(access_token=access_token, user=user_response)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Login error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Login failed: {str(e)}")
 
 @api_router.post("/auth/biometric-recovery")
 async def biometric_recovery(recovery_data: BiometricRecoveryRequest):
