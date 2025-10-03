@@ -52,8 +52,14 @@ export const OnboardingScreen = () => {
   });
 
   const navigateToLogin = () => {
+    setIsFirstTime(false); // Marca que não é a primeira vez
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem('isFirstTime', 'false'); // Persiste o estado
+    }
     setShowRegister(false);
-    // Force show login by setting user context appropriately
+    // Simula redirecionamento para login (adicionar navegação real amanhã)
+    Alert.alert('Login', 'Redirecionando para tela de login (funcionalidade em desenvolvimento).');
+    // Se usar React Navigation, substitua por: navigation.navigate('Login');
   };
 
   const nextPage = () => {
@@ -140,10 +146,7 @@ export const OnboardingScreen = () => {
       <View style={styles.loginLinkContainer}>
         <TouchableOpacity 
           style={styles.loginLink}
-          onPress={() => {
-            // IR DIRETO PARA LOGIN, NÃO REGISTRO
-            setIsFirstTime(false); // Marca que não é primeira vez
-          }}
+          onPress={navigateToLogin} // Agora usa a função correta
         >
           <Text style={styles.loginLinkText}>Já tenho uma conta</Text>
         </TouchableOpacity>
