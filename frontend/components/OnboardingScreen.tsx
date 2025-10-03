@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
 import { RegisterForm } from './RegisterForm';
+import { useNavigation } from '@react-navigation/native'; // Adicionado para navegação
 
 const { width } = Dimensions.get('window');
 
@@ -41,6 +42,7 @@ const onboardingData = [
 ];
 
 export const OnboardingScreen = () => {
+  const navigation = useNavigation(); // Adicionado para redirecionar
   const [currentPage, setCurrentPage] = useState(0);
   const [showRegister, setShowRegister] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
@@ -51,15 +53,29 @@ export const OnboardingScreen = () => {
     return true;
   });
 
+  // Verifica se já tem usuário salvo e redireciona
+  useEffect(() => {
+    const checkUser = async () => {
+      const db = await indexedDB.open('NexaKeyDB', 1);
+      const transaction = db.transaction(['users'], 'readonly');
+      const store = transaction.objectStore('users');
+      const user = await store.get('iflavicosta@hotmail.com.br');
+      if (user) {
+        setIsFirstTime(false);
+        localStorage.setItem('isFirstTime', 'false');
+        navigation.navigate('Dashboard'); // Vai direto para dashboard se já registrado
+      }
+    };
+    checkUser();
+  }, []);
+
   const navigateToLogin = () => {
     setIsFirstTime(false); // Marca que não é a primeira vez
     if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.setItem('isFirstTime', 'false'); // Persiste o estado
     }
     setShowRegister(false);
-    // Simula redirecionamento para login (adicionar navegação real amanhã)
-    Alert.alert('Login', 'Redirecionando para tela de login (funcionalidade em desenvolvimento).');
-    // Se usar React Navigation, substitua por: navigation.navigate('Login');
+    navigation.navigate('Login'); // Redireciona para tela de login
   };
 
   const nextPage = () => {
@@ -146,7 +162,7 @@ export const OnboardingScreen = () => {
       <View style={styles.loginLinkContainer}>
         <TouchableOpacity 
           style={styles.loginLink}
-          onPress={navigateToLogin} // Agora usa a função correta
+          onPress={navigateToLogin} // Usa a função correta
         >
           <Text style={styles.loginLinkText}>Já tenho uma conta</Text>
         </TouchableOpacity>
