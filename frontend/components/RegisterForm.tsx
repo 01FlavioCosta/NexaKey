@@ -134,21 +134,48 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onBack, onShowLogin 
 
     try {
       setIsLoading(true);
-      await register(email.trim(), masterPassword, biometricEnabled);
-      // Sucesso no servidor: Salva local para persistência
-      await AsyncStorage.setItem('user', JSON.stringify({ email: email.trim(), masterHash: masterPassword, biometric: biometricEnabled }));
-      Alert.alert('Sucesso', 'Registro concluído!');
-      navigation.navigate('Dashboard');
-    } catch (error: any) {
-      // Fallback agressivo para erro 405 ou servidor
-      console.error('Registro falhou no servidor:', error);
+      
+      // Try API first
       try {
-        await AsyncStorage.setItem('user', JSON.stringify({ email: email.trim(), masterHash: masterPassword, biometric: biometricEnabled }));
-        Alert.alert('Sucesso Local', 'Registro salvo localmente (servidor falhou, mas app funciona off-line).');
-        navigation.navigate('Dashboard');
-      } catch (localError) {
-        Alert.alert('Erro Local', 'Falha ao salvar localmente. Tente novamente.');
+        await register(email.trim(), masterPassword, biometricEnabled);
+      } catch (apiError: any) {
+        console.log('API failed, using local fallback:', apiError);
+        
+        // Fallback: Use AsyncStorage for local storage
+        const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+        
+        // Hash password with crypto
+        const encoder = new TextEncoder();
+        const data = encoder.encode(masterPassword + 'salt123');
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const masterPasswordHash = Array.from(new Uint8Array(hashBuffer))
+          .map(b => b.toString(16).padStart(2, '0'))
+          .join('');
+
+        // Store user data locally
+        const userData = {
+          email: email.trim(),
+          masterPasswordHash,
+          biometricEnabled,
+          createdAt: Date.now(),
+          is_premium: false,
+          vault_items_count: 0
+        };
+
+        await AsyncStorage.setItem('nexakey_user', JSON.stringify(userData));
+        await AsyncStorage.setItem('nexakey_token', 'local_token_' + Date.now());
+        await AsyncStorage.setItem('nexakey_logged_in', 'true');
+
+        Alert.alert('Sucesso', 'Conta criada localmente!', [
+          { text: 'OK', onPress: () => {
+            // Navigate to dashboard by forcing re-render
+            window.location.reload();
+          }}
+        ]);
+        return;
       }
+    } catch (error: any) {
+      Alert.alert('Erro no Cadastro', error.message || 'Falha ao criar conta');
     } finally {
       setIsLoading(false);
     }
