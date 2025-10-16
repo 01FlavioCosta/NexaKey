@@ -120,8 +120,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   ): Promise<void> => {
     try {
       setIsLoading(true);
+      console.log('📝 Starting registration for:', email);
 
-      // Generate salt for this user
+      // Generate salt for this user (consistent across devices)
       const salt = EncryptionService.generateSalt();
       
       // Hash master password for server storage
@@ -130,7 +131,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Derive encryption key for client-side encryption
       const encryptionKey = await EncryptionService.deriveKey(password, salt);
 
-      console.log('Registering user with email:', email);
+      console.log('🚀 Attempting server registration...');
 
       const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: 'POST',
@@ -144,24 +145,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }),
       });
 
-      const responseText = await response.text();
-      console.log('Registration response:', response.status, responseText);
+      console.log('📡 Registration response status:', response.status);
 
       if (!response.ok) {
-        let errorMessage = 'Falha no registro';
-        try {
-          const error = JSON.parse(responseText);
-          errorMessage = error.detail || errorMessage;
-        } catch (parseError) {
-          console.error('Error parsing response:', parseError);
-          errorMessage = `Erro ${response.status}: ${responseText}`;
-        }
-        throw new Error(errorMessage);
+        const errorText = await response.text();
+        console.log('❌ Registration error:', errorText);
+        throw new Error('Erro no registro. Tente novamente.');
       }
 
-      const data = JSON.parse(responseText);
+      const data = await response.json();
+      console.log('✅ Registration successful');
       
-      // Store user data and tokens
+      // Store user data and tokens FIRST
       await SecureStorageService.storeAccessToken(data.access_token);
       await SecureStorageService.storeUserData(data.user);
       await SecureStorageService.storeUserSalt(salt);
@@ -173,13 +168,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         await SecureStorageService.storeBiometricKey(encryptionKey);
       }
 
+      // Update state LAST
       setUser(data.user);
       setMasterKeyState(encryptionKey);
-      setIsFirstTime(false);
+      setIsFirstTime(false); // Important: mark as not first time
       
-      console.log('Registration successful for:', email);
+      console.log('✅ Registration completed, user logged in');
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error('💥 Registration error:', error);
       throw error;
     } finally {
       setIsLoading(false);
