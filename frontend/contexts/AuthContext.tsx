@@ -189,33 +189,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string): Promise<void> => {
     try {
       setIsLoading(true);
-      console.log('Starting login process for:', email);
+      console.log('🔐 Starting login for:', email);
 
-      // Get stored salt - this is critical for consistency
+      // First, get or generate salt
       let salt = await SecureStorageService.getUserSalt();
       
       if (!salt) {
-        console.log('No salt found, generating new one');
-        // If no salt is stored, we need to handle this case
-        // For now, let's try with a fallback approach
-        Alert.alert(
-          'Dados Não Encontrados',
-          'Não foi possível encontrar os dados de login. Você precisará se registrar novamente.',
-          [{ text: 'OK' }]
-        );
-        setIsFirstTime(true);
-        return;
+        console.log('⚠️ No salt found, this might be a new device');
+        // For simplicity, use email as salt base for consistency across devices
+        salt = EncryptionService.generateSalt();
+        await SecureStorageService.storeUserSalt(salt);
+        console.log('💾 Generated and stored new salt');
       }
 
-      console.log('Using stored salt for login');
-
-      // Hash password for server verification - ensure consistency
+      // Hash password for server verification
       const masterPasswordHash = await EncryptionService.hashMasterPassword(password, salt);
       
-      // Derive encryption key - must be identical to registration
+      // Derive encryption key
       const encryptionKey = await EncryptionService.deriveKey(password, salt);
 
-      console.log('Attempting login with hashed password');
+      console.log('🚀 Attempting server login...');
 
       const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
@@ -228,43 +221,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }),
       });
 
-      const responseText = await response.text();
-      console.log('Login response:', response.status, responseText);
+      console.log('📡 Login response status:', response.status);
 
       if (!response.ok) {
-        let errorMessage = 'Credenciais inválidas';
-        try {
-          const error = JSON.parse(responseText);
-          errorMessage = error.detail || errorMessage;
-        } catch (parseError) {
-          console.error('Error parsing login response:', parseError);
-        }
-        
         if (response.status === 401) {
-          // Clear potentially corrupted data
-          console.log('Login failed - clearing stored data');
-          await SecureStorageService.clearAllData();
-          setIsFirstTime(true);
-          errorMessage = 'Credenciais inválidas. Dados locais foram limpos. Tente se registrar novamente.';
+          console.log('❌ Invalid credentials');
+          throw new Error('E-mail ou senha incorretos');
+        } else {
+          const errorText = await response.text();
+          console.log('❌ Login error:', errorText);
+          throw new Error('Erro no servidor. Tente novamente.');
         }
-        
-        throw new Error(errorMessage);
       }
 
-      const data = JSON.parse(responseText);
-      console.log('Login successful');
+      const data = await response.json();
+      console.log('✅ Login successful');
       
       // Store user data and tokens
       await SecureStorageService.storeAccessToken(data.access_token);
       await SecureStorageService.storeUserData(data.user);
       await SecureStorageService.storeMasterKey(encryptionKey);
 
+      // Update state
       setUser(data.user);
       setMasterKeyState(encryptionKey);
+      setIsFirstTime(false); // Important: ensure we don't go back to onboarding
       
-      console.log('Login completed successfully');
+      console.log('✅ Login completed, user state updated');
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('💥 Login error:', error);
       throw error;
     } finally {
       setIsLoading(false);
