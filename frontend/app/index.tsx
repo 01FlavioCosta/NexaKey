@@ -9,19 +9,32 @@ import { LoadingScreen } from '../components/LoadingScreen';
 const AppContent = () => {
   const { user, isLoading, isFirstTime } = useAuth();
 
+  console.log('🎯 AppContent State:', { 
+    user: !!user, 
+    isLoading, 
+    isFirstTime,
+    userEmail: user?.email 
+  });
+
   if (isLoading) {
     return <LoadingScreen />;
   }
 
+  // If user is logged in, show vault
+  if (user) {
+    console.log('✅ User logged in, showing vault');
+    return <VaultScreen />;
+  }
+
+  // If first time, show onboarding
   if (isFirstTime) {
+    console.log('👋 First time, showing onboarding');
     return <OnboardingScreen />;
   }
 
-  if (!user) {
-    return <LoginScreen />;
-  }
-
-  return <VaultScreen />;
+  // Otherwise show login
+  console.log('🔒 Showing login screen');
+  return <LoginScreen />;
 };
 
 export default function App() {
