@@ -104,14 +104,16 @@ async def get_current_user(token: str = Depends(security)):
 @api_router.post("/auth/register", response_model=LoginResponse)
 async def register_user(user_data: UserCreate):
     try:
+        print(f"🔵 Registration attempt for: {user_data.email}")
+        print(f"🔵 Received hash: {user_data.master_password_hash[:50]}...")
+        
         # Check if user already exists
         existing_user = await db.users.find_one({"email": user_data.email})
         if existing_user:
-            # For demo purposes, we'll allow re-registration by updating the existing user
-            # In production, this should return an error
+            print(f"🔄 Updating existing user: {user_data.email}")
             user_id = existing_user["_id"]
             
-            # Update existing user
+            # Update existing user with NEW hash
             await db.users.update_one(
                 {"_id": user_id},
                 {"$set": {
@@ -120,9 +122,8 @@ async def register_user(user_data: UserCreate):
                     "updated_at": datetime.utcnow()
                 }}
             )
-            
-            print(f"Updated existing user: {user_data.email}")
         else:
+            print(f"🆕 Creating new user: {user_data.email}")
             # Create new user
             user_id = str(uuid.uuid4())
             user_doc = {
@@ -135,7 +136,8 @@ async def register_user(user_data: UserCreate):
             }
             
             await db.users.insert_one(user_doc)
-            print(f"Created new user: {user_data.email}")
+        
+        print(f"✅ User saved with hash: {user_data.master_password_hash[:50]}...")
         
         # Create access token
         access_token = create_access_token({"sub": user_id})
@@ -156,20 +158,31 @@ async def register_user(user_data: UserCreate):
         return LoginResponse(access_token=access_token, user=user_response)
         
     except Exception as e:
-        print(f"Registration error: {str(e)}")
+        print(f"💥 Registration error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Registration failed: {str(e)}")
 
 @api_router.post("/auth/login", response_model=LoginResponse)
 async def login_user(login_data: LoginRequest):
     try:
+        print(f"🔵 Login attempt for: {login_data.email}")
+        print(f"🔵 Received hash: {login_data.master_password_hash[:50]}...")
+        
         # Find user
         user = await db.users.find_one({"email": login_data.email})
         if not user:
+            print(f"❌ User not found: {login_data.email}")
             raise HTTPException(status_code=401, detail="Invalid credentials")
         
-        # Verify password hash (client sends already hashed password)
+        print(f"🔍 Stored hash: {user['master_password_hash'][:50]}...")
+        
+        # Compare hashes directly (both should be bcrypt hashes)
         if user["master_password_hash"] != login_data.master_password_hash:
+            print(f"❌ Hash mismatch for: {login_data.email}")
+            print(f"❌ Expected: {user['master_password_hash'][:50]}...")
+            print(f"❌ Got: {login_data.master_password_hash[:50]}...")
             raise HTTPException(status_code=401, detail="Invalid credentials")
+        
+        print(f"✅ Hash match! Login successful for: {login_data.email}")
         
         # Get vault items count
         vault_count = await db.vault_items.count_documents({"user_id": user["_id"]})
@@ -192,7 +205,7 @@ async def login_user(login_data: LoginRequest):
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Login error: {str(e)}")
+        print(f"💥 Login error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Login failed: {str(e)}")
 
 @api_router.post("/auth/biometric-recovery")
