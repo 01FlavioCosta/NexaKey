@@ -65,13 +65,15 @@ export class EncryptionService {
     }
   }
 
-  // Hash master password for server storage using bcrypt
+  // Hash master password for server storage using PBKDF2 (deterministic)
   static async hashMasterPassword(password: string, salt: string): Promise<string> {
     try {
-      // Use bcrypt with salt rounds for password hashing
-      const saltRounds = 12;
-      const hash = await bcrypt.hash(password + salt, saltRounds);
-      return hash;
+      // Use PBKDF2 for deterministic hashing (same input = same output)
+      const hash = CryptoJS.PBKDF2(password, salt, {
+        keySize: 512/32,
+        iterations: 100000
+      });
+      return hash.toString();
     } catch (error) {
       console.error('Password hashing failed:', error);
       throw new Error('Failed to hash password');
