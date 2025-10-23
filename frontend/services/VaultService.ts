@@ -77,14 +77,9 @@ export class VaultService {
         } catch (decryptError) {
           console.error(`Failed to decrypt item: ${item.id}`, decryptError);
           
-          // Instead of skipping, let's try to delete corrupted items
-          try {
-            console.log(`Attempting to delete corrupted item: ${item.id}`);
-            await this.deleteVaultItem(item.id);
-            console.log(`Deleted corrupted item: ${item.id}`);
-          } catch (deleteError) {
-            console.error(`Failed to delete corrupted item: ${item.id}`, deleteError);
-          }
+          // Skip corrupted items silently instead of trying to delete
+          // (they might already be deleted or the user doesn't have permission)
+          console.log(`Skipping corrupted item: ${item.id}`);
         }
       }
 
