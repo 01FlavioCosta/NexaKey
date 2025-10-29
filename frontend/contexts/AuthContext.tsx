@@ -45,19 +45,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       console.log('🔍 Initializing auth...');
       
-      // Always check for existing user data first
+      // Check for existing user data
       const userData = await SecureStorageService.getUserData();
       const token = await SecureStorageService.getAccessToken();
+      const salt = await SecureStorageService.getUserSalt();
+      const masterKey = await SecureStorageService.getMasterKey();
       
       console.log('📱 Storage check:', { 
         hasUserData: !!userData, 
         hasToken: !!token,
+        hasSalt: !!salt,
+        hasMasterKey: !!masterKey,
         userEmail: userData?.email 
       });
 
-      // If we have both user data and token, try to validate
-      if (userData && token) {
-        console.log('🔑 Found existing auth data, validating...');
+      // If we have complete user data, try to restore session
+      if (userData && token && salt && masterKey) {
+        console.log('🔄 Found complete session data, attempting restore...');
         
         try {
           const response = await fetch(`${API_BASE_URL}/api/user/profile`, {
@@ -69,47 +73,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
           if (response.ok) {
             const userProfile = await response.json();
-            console.log('✅ Token valid, restoring user session');
+            console.log('✅ Session restored successfully');
             
+            // Restore complete state
             setUser(userProfile);
-            
-            // Try to restore master key
-            const storedKey = await SecureStorageService.getMasterKey();
-            if (storedKey) {
-              setMasterKeyState(storedKey);
-              console.log('🔐 Master key restored');
-            }
-            
-            // User is logged in, skip onboarding
+            setMasterKeyState(masterKey);
             setIsFirstTime(false);
             setIsLoading(false);
             return;
           } else {
-            console.log('❌ Token invalid, clearing data');
-            await SecureStorageService.clearAllData();
+            console.log('❌ Token invalid, status:', response.status);
           }
         } catch (error) {
-          console.error('🚨 Token validation failed:', error);
-          await SecureStorageService.clearAllData();
+          console.error('🚨 Session validation failed:', error);
         }
       }
 
-      // Check if this is truly first time (no user data at all)
-      if (!userData) {
-        console.log('👋 First time user, showing onboarding');
-        setIsFirstTime(true);
-      } else {
-        console.log('🔒 Existing user, showing login');
+      // If we have user data but no complete session, show login
+      if (userData && userData.email) {
+        console.log('🔒 Partial data found, showing login for:', userData.email);
         setIsFirstTime(false);
+      } else {
+        console.log('👋 No user data, showing onboarding');
+        setIsFirstTime(true);
       }
       
     } catch (error) {
       console.error('💥 Auth initialization error:', error);
-      // On error, show onboarding to be safe
       setIsFirstTime(true);
     } finally {
       setIsLoading(false);
-      console.log('✅ Auth initialization complete');
     }
   };
 
