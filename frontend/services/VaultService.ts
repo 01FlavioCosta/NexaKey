@@ -97,9 +97,31 @@ export class VaultService {
     masterKey: string
   ): Promise<void> {
     try {
+      console.log('🔐 Creating vault item:', itemType);
+      
+      // Ensure data is properly structured
+      const cleanData = {
+        name: itemData.name || '',
+        username: itemData.username || '',
+        password: itemData.password || '',
+        website: itemData.website || '',
+        notes: itemData.notes || '',
+        // Credit card fields
+        cardNumber: itemData.cardNumber || '',
+        expiryDate: itemData.expiryDate || '',
+        cvv: itemData.cvv || '',
+        cardholderName: itemData.cardholderName || '',
+        cardPassword: itemData.cardPassword || '',
+      };
+
+      console.log('📝 Clean data prepared:', Object.keys(cleanData));
+
       // Encrypt data client-side
-      const dataToEncrypt = JSON.stringify(itemData);
+      const dataToEncrypt = JSON.stringify(cleanData);
+      console.log('📦 Data to encrypt length:', dataToEncrypt.length);
+      
       const encryptedData = EncryptionService.encrypt(dataToEncrypt, masterKey);
+      console.log('🔒 Encryption successful, length:', encryptedData.length);
 
       const headers = await this.getAuthHeaders();
       const response = await fetch(`${API_BASE_URL}/api/vault/items`, {
@@ -111,12 +133,19 @@ export class VaultService {
         }),
       });
 
+      console.log('📡 Server response status:', response.status);
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to create vault item');
+        const errorText = await response.text();
+        console.error('❌ Server error:', errorText);
+        throw new Error(`Erro no servidor: ${response.status}`);
       }
+
+      const result = await response.json();
+      console.log('✅ Item saved successfully:', result.id);
+      
     } catch (error) {
-      console.error('VaultService.createVaultItem error:', error);
+      console.error('💥 VaultService.createVaultItem error:', error);
       throw error;
     }
   }
